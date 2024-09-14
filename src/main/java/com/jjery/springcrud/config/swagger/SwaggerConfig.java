@@ -38,7 +38,7 @@ public class SwaggerConfig {
                             .title("Spring CRUD API")
                             .version("1.0")
                             .description(
-                                    "API Test용 ID :  Token : "));
+                                    "API Test용 ID : testdev Token : eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJ0ZXN0ZGV2Iiwic3ViIjoi7Z6Y7LCsIOy9lOuBvOumrCIsImlhdCI6MTcyNjMzNjk2MywiZXhwIjoxNzI2NDE5NzYzfQ.lBce-P8E9lutlFrfJ41qn5glcJ8ZzWzgkZTE6f5364E "));
   }
 
   @Bean
