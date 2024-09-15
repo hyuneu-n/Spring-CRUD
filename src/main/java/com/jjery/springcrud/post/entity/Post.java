@@ -34,7 +34,7 @@ public class Post {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
     //작성자
-    @Column(name = "author")
+    @JoinColumn(name = "author", referencedColumnName = "nickname")
     private String author;
     //게시물 작성 날짜
     @Column
