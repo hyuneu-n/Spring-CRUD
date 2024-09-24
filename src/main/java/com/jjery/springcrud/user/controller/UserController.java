@@ -1,6 +1,7 @@
 package com.jjery.springcrud.user.controller;
 
 import com.jjery.springcrud.user.dto.*;
+import com.jjery.springcrud.user.entity.User;
 import com.jjery.springcrud.user.service.UserService;
 import com.jjery.springcrud.user.util.JwtUtil;
 import com.jjery.springcrud.user.util.NicknameGenerator;
@@ -87,17 +88,23 @@ public class UserController {
     try {
       // 로그인 서비스 호출
       String accessToken = userService.loginUser(request.getLoginId(), request.getPassword());
-      // Refresh Token 생성
+
+      // Refresh Token 생성 및 저장
       String refreshToken = jwtUtil.createRefreshToken(request.getLoginId());
-      // Refresh Token DB에 저장 ( 만료일 7일 )
       userService.saveRefreshToken(request.getLoginId(), refreshToken);
-      return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
+
+      // 사용자 정보 가져오기 (닉네임 등)
+      User user = userService.findUserByLoginId(request.getLoginId());
+
+      // 닉네임, 토큰 등 응답에 포함
+      AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, user.getLoginId(), user.getNickname());
+      return ResponseEntity.ok(authResponse);
+
     } catch (RuntimeException e) {
-      log.error("Error during user login in controller /api/login: {}", e.getMessage());
+      log.error("Error during user login: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
-
   // 리프레시 토큰 엔드포인트
   /*
    * URL: /api/users/refresh-token

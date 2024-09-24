@@ -53,8 +53,8 @@ public class UserService implements UserDetailsService {
 
   // 로그인 로직
   public String loginUser(String loginId, String password) {
-    User user =
-        userRepository
+    // userRepository를 통해 findByLoginId 호출
+    User user = userRepository
             .findByLoginId(loginId)
             .orElseThrow(() -> new RuntimeException("Invalid login ID or password"));
 
@@ -63,17 +63,23 @@ public class UserService implements UserDetailsService {
       throw new RuntimeException("Invalid login ID or password");
     }
 
+    // 토큰 생성
     return jwtUtil.createAccessToken(user.getLoginId(), user.getNickname());
   }
 
   // Refresh 토큰 저장 로직
   public User saveRefreshToken(String loginId, String refreshToken) {
-    User user =
-        userRepository
+    User user = userRepository
             .findByLoginId(loginId)
             .orElseThrow(() -> new RuntimeException("User not found"));
     user.setRefreshToken(refreshToken);
     return userRepository.save(user);
+  }
+
+  // 필요하다면 이와 같은 추가적인 메서드를 정의할 수 있음
+  public User findUserByLoginId(String loginId) {
+    return userRepository.findByLoginId(loginId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
   }
 
   @Override
