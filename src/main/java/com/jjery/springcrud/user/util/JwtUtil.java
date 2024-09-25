@@ -23,16 +23,17 @@ public class JwtUtil {
   }
 
   // Access Token 발급 부분
-  public String createAccessToken(String userId, String userName) {
-    Date expireTime = Date.from(Instant.now().plus(23, ChronoUnit.HOURS));
+  public String createAccessToken(String userId, String userName, String userRole) {
+    Date expireTime = Date.from(Instant.now().plus(23, ChronoUnit.HOURS)); // 23시간 후 만료
     Key key = getSigningKey();
     return Jwts.builder()
-        .setId(userId)
-        .setSubject(userName)
-        .setIssuedAt(new Date())
-        .setExpiration(expireTime)
-        .signWith(key, SignatureAlgorithm.HS256)
-        .compact();
+            .setId(userId)
+            .setSubject(userName)  // userName을 subject로 설정
+            .claim("role", userRole)  // 역할 정보를 클레임에 추가
+            .setIssuedAt(new Date())
+            .setExpiration(expireTime)
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
   }
   // Refresh Token 발급 부분
   public String createRefreshToken(String userId) {

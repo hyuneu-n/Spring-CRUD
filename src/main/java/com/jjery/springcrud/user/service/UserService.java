@@ -28,7 +28,7 @@ public class UserService implements UserDetailsService {
   // 회원가입 비지니스 로직
   // DTO 생성해서 코드 수정
   public UserRegistrationResponseDTO registerUser(
-      String loginId, String password, String nickname) {
+          String loginId, String password, String nickname) {
 
     // 새로운 사용자 생성
     User user = new User();
@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
 
     // 응답 DTO 생성 및 반환
     return new UserRegistrationResponseDTO(
-        savedUser.getLoginId(), savedUser.getNickname(), "회원가입이 성공적으로 완료되었습니다.");
+            savedUser.getLoginId(), savedUser.getNickname(), "회원가입이 성공적으로 완료되었습니다.");
   }
 
   public boolean isLoginIdAvailable(String loginId) {
@@ -63,8 +63,8 @@ public class UserService implements UserDetailsService {
       throw new RuntimeException("Invalid login ID or password");
     }
 
-    // 토큰 생성
-    return jwtUtil.createAccessToken(user.getLoginId(), user.getNickname());
+    // 토큰 생성 (사용자 역할 포함)
+    return jwtUtil.createAccessToken(user.getLoginId(), user.getNickname(), user.getUserRole());
   }
 
   // Refresh 토큰 저장 로직
@@ -85,22 +85,22 @@ public class UserService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     User user =
-        userRepository
-            .findByLoginId(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            userRepository
+                    .findByLoginId(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     List<GrantedAuthority> authorities =
-        Collections.singletonList(new SimpleGrantedAuthority(user.getUserRole()));
+            Collections.singletonList(new SimpleGrantedAuthority(user.getUserRole()));
 
     return new org.springframework.security.core.userdetails.User(
-        user.getLoginId(), user.getLoginPw(), authorities);
+            user.getLoginId(), user.getLoginPw(), authorities);
   }
 
   public String findNicknameByLoginId(String loginId) {
     User user =
-        userRepository
-            .findByLoginId(loginId)
-            .orElseThrow(() -> new RuntimeException("User not found with login ID: " + loginId));
+            userRepository
+                    .findByLoginId(loginId)
+                    .orElseThrow(() -> new RuntimeException("User not found with login ID: " + loginId));
     return user.getNickname();
   }
 }

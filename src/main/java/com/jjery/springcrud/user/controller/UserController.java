@@ -129,7 +129,7 @@ public class UserController {
       }
       // 새로운 Access Token 생성
       String newAccessToken =
-          jwtUtil.createAccessToken(request.getLoginId(), request.getNickname());
+              jwtUtil.createAccessToken(request.getLoginId(), request.getNickname(), request.getUserRole());
       return ResponseEntity.ok(new AuthResponse(newAccessToken));
     } catch (RuntimeException e) {
       // 예외 발생 시 로그 출력

@@ -22,15 +22,22 @@ public class PostController {
     private final PostService postService;
     private final JwtUtil jwtUtil;
 
-    @Operation(summary = "전체 게시글 조회", description = "전체 게시글 조회")
-    @GetMapping
-    public ResponseEntity<List<PostResponseDTO>> getAllPosts() {
-        List<PostResponseDTO> posts = postService.getAllPosts();
+//    @Operation(summary = "전체 게시글 조회", description = "전체 게시글 조회")
+//    @GetMapping
+//    public ResponseEntity<List<PostResponseDTO>> getAllPosts() {
+//        List<PostResponseDTO> posts = postService.getAllPosts();
+//        return ResponseEntity.ok(posts);
+//    }
+
+    @Operation(summary = "카테고리별 게시글 조회", description = "특정 카테고리의 게시글만 조회")
+    @GetMapping("/{category}")
+    public ResponseEntity<List<PostResponseDTO>> getPostsByCategory(@PathVariable String category) {
+        List<PostResponseDTO> posts = postService.getPostsByCategory(category);
         return ResponseEntity.ok(posts);
     }
 
     @Operation(summary = "특정 게시글 조회", description = "특정 게시글 조회")
-    @GetMapping("/{id}")
+    @GetMapping("/{category}/{id}")
     public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long id) {
         PostResponseDTO post = postService.getPostById(id);
         return ResponseEntity.ok(post);
@@ -41,12 +48,16 @@ public class PostController {
     public ResponseEntity<Post> createPost(
             @RequestHeader("Authorization") String bearerToken,
             @RequestBody PostRequestDTO postRequestDTO) {
+        log.info("게시글 작성 요청 받음: {}", postRequestDTO);
         try {
             String token = bearerToken.substring(7);
             Claims claims = jwtUtil.getAllClaimsFromToken(token);
             String loginId = claims.getId(); // 로그인 아이디
 
+            log.info("게시글 작성 요청 받음: 작성자 ID - {}, 제목 - {}", loginId, postRequestDTO.getTitle());
+
             Post createdPost = postService.createPost(postRequestDTO, loginId);
+            log.info("게시글 작성 완료: 게시글 ID - {}, 작성자 - {}", createdPost.getId(), loginId);
             return ResponseEntity.ok(createdPost);
         } catch (RuntimeException e) {
             log.error(

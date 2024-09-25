@@ -44,4 +44,7 @@ public class Post {
     @Column
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Column(name = "category")
+    private String category;
 }

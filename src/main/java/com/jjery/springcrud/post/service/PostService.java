@@ -45,24 +45,28 @@ public class PostService {
 
     @Transactional
     public Post createPost(PostRequestDTO postRequestDTO, String userId) {
-        User user =
-                userRepository
-                        .findByLoginId(userId)
-                        .orElseThrow(()-> new RuntimeException("User not found"));
+        log.info("게시글 작성 요청 수신: 제목 - {}, 작성자 - {}", postRequestDTO.getTitle(), userId);
+
+        User user = userRepository.findByLoginId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Post post = new Post();
         post.setUserId(user);
         post.setAuthor(user.getLoginId());
         post.setTitle(postRequestDTO.getTitle());
         post.setContent(postRequestDTO.getContent());
+        post.setCategory(postRequestDTO.getCategory()); // 카테고리 필드 설정
         post.setCreatedAt(LocalDateTime.now());
 
-        return postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+        log.info("게시글 저장 완료: 게시글 ID - {}, 작성자 - {}", savedPost.getId(), savedPost.getAuthor());
+
+        return savedPost;
     }
 
     @Transactional
     public PostResponseDTO updatePost(Long id, PostRequestDTO postRequestDTO, String userId) {
-        Post postToUpdate = postRepository
-                .findById(id)
+        Post postToUpdate = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Not found post with id: " + id));
 
         if (!postToUpdate.getAuthor().equals(userId)) {
@@ -71,6 +75,7 @@ public class PostService {
 
         postToUpdate.setTitle(postRequestDTO.getTitle());
         postToUpdate.setContent(postRequestDTO.getContent());
+        postToUpdate.setCategory(postRequestDTO.getCategory()); // 카테고리 필드 업데이트
         postToUpdate.setUpdatedAt(LocalDateTime.now());
 
         Post updatedPost = postRepository.save(postToUpdate);
@@ -100,6 +105,14 @@ public class PostService {
         postResponseDTO.setContent(post.getContent());
 
         return postResponseDTO;
+    }
+
+    // 카테고리별 게시글 조회 메서드
+    public List<PostResponseDTO> getPostsByCategory(String category) {
+        List<Post> posts = postRepository.findByCategory(category);
+        return posts.stream()
+                .map(this::convertToPostResponseDTO)
+                .collect(Collectors.toList());
     }
 }
 
